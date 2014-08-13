@@ -321,6 +321,10 @@ ns_registry <- function() {
   .Call(nsreg)
 }
 
+#' @useDynLib devtools isReparsePoint
+is.junction <- function(paths) {
+  .Call(isReparsePoint, as.character(paths))
+}
 
 # Register a namespace
 register_namespace <- function(name = NULL, env = NULL) {
