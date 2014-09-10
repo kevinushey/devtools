@@ -28,6 +28,7 @@ path. Repeated entries will be silently removed.
 Other infrastructure: \code{\link{add_rstudio_project}},
   \code{\link{add_test_infrastructure}},
   \code{\link{add_travis}}, \code{\link{infrastructure}},
+  \code{\link{infrastructure}}, \code{\link{use_cmake}},
   \code{\link{use_package_doc}}, \code{\link{use_rcpp}},
   \code{\link{use_rstudio}}, \code{\link{use_testthat}},
   \code{\link{use_travis}}, \code{\link{use_vignette}};

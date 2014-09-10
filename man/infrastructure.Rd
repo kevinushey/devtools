@@ -4,6 +4,7 @@
 \alias{add_test_infrastructure}
 \alias{add_travis}
 \alias{infrastructure}
+\alias{use_cmake}
 \alias{use_package_doc}
 \alias{use_rcpp}
 \alias{use_rstudio}
@@ -12,6 +13,8 @@
 \alias{use_vignette}
 \title{Add useful infrastructure to a package.}
 \usage{
+use_cmake(pkg = ".")
+
 use_testthat(pkg = ".")
 
 use_rstudio(pkg = ".")
@@ -34,6 +37,12 @@ numbers, letters, _ and -. I recommend using lower case.}
 \description{
 Add useful infrastructure to a package.
 }
+\section{\code{use_cmake}}{
+
+Adds a \code{CMakeLists.txt} file to the project, which IDEs can use to
+properly build the project.
+}
+
 \section{\code{use_testthat}}{
 
 Add testing infrastructure to a package that does not already have it.
