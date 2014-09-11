@@ -45,9 +45,10 @@ use_xcode <- function(pkg = ".") {
     stop("No 'cmake' executable could be found; cannot build XCode project scaffolding")
   }
 
+  rel_build_path <- paste(pkg$package, "xcode", "build", sep = "-")
   build_path <- file.path(
     pkg$path,
-    paste(pkg$package, "xcode", "build", sep = "-")
+    rel_build_path
   )
 
   if (dir.exists(build_path)) {
@@ -59,7 +60,7 @@ use_xcode <- function(pkg = ".") {
     system2("cmake", c("-GXcode", "..", "-Wno-dev"))
   })
 
-  use_build_ignore(build_path, pkg = pkg)
+  use_build_ignore(rel_build_path, pkg = pkg)
 
   open <- paste("open", file.path(build_path, paste0(pkg$package, ".xcodeproj")))
 
