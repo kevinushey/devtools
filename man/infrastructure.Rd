@@ -11,9 +11,12 @@
 \alias{use_testthat}
 \alias{use_travis}
 \alias{use_vignette}
+\alias{use_xcode}
 \title{Add useful infrastructure to a package.}
 \usage{
 use_cmake(pkg = ".")
+
+use_xcode(pkg = ".")
 
 use_testthat(pkg = ".")
 
@@ -42,6 +45,12 @@ Add useful infrastructure to a package.
 Adds a \code{CMakeLists.txt} file to the project and generates a build directory
 (at \code{<pkg>-build}), which IDEs can use to open and provide code navigation
 and completion.
+}
+
+\section{\code{use_xcode}}{
+
+Allows an \R package containing C/C++ source files to be managed from within
+the XCode IDE.
 }
 
 \section{\code{use_testthat}}{

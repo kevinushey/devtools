@@ -31,6 +31,12 @@ use_cmake <- function(pkg = ".") {
 
 }
 
+#' @section \code{use_xcode}:
+#' Allows an \R package containing C/C++ source files to be managed from within
+#' the XCode IDE.
+#' @export
+#' @name infrastructure
+#' @rdname infrastructure
 use_xcode <- function(pkg = ".") {
   pkg <- as.package(pkg)
   use_cmake(pkg = pkg)
