@@ -39,8 +39,9 @@ Add useful infrastructure to a package.
 }
 \section{\code{use_cmake}}{
 
-Adds a \code{CMakeLists.txt} file to the project, which IDEs can use to
-properly build the project.
+Adds a \code{CMakeLists.txt} file to the project and generates a build directory
+(at \code{<pkg>-build}), which IDEs can use to open and provide code navigation
+and completion.
 }
 
 \section{\code{use_testthat}}{
