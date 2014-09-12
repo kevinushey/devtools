@@ -5,6 +5,7 @@
 \alias{add_travis}
 \alias{infrastructure}
 \alias{use_cmake}
+\alias{use_ide}
 \alias{use_package_doc}
 \alias{use_rcpp}
 \alias{use_rstudio}
@@ -15,6 +16,8 @@
 \title{Add useful infrastructure to a package.}
 \usage{
 use_cmake(pkg = ".")
+
+use_ide(pkg = ".")
 
 use_xcode(pkg = ".")
 
@@ -45,6 +48,12 @@ Add useful infrastructure to a package.
 Adds a \code{CMakeLists.txt} file to the project and generates a build directory
 (at \code{<pkg>-build}), which IDEs can use to open and provide code navigation
 and completion.
+}
+
+\section{\code{use_ide}}{
+
+Allows an \R package containing C/C++ source files to be managed from within
+a generic cmake-compatible IDE, e.g. QtCreator.
 }
 
 \section{\code{use_xcode}}{

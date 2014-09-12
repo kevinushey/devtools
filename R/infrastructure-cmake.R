@@ -8,6 +8,15 @@
 use_cmake <- function(pkg = ".") {
   pkg <- as.package(pkg)
 
+  cmakelists_path <- file.path(pkg$path, "CMakeLists.txt")
+  if (interactive() && file.exists(cmakelists_path)) {
+    response <- readline("A 'CMakeLists.txt' file already exists! Overwrite? [Y/n]: ")
+    if (tolower(substring(response, 1, 1)) != "y") {
+      message("Aborted from 'use_cmake()'.")
+      return(invisible(NULL))
+    }
+  }
+
   platforms <- list(
     Windows = use_cmake_windows(pkg = pkg),
     Mac = use_cmake_mac(pkg = pkg),
@@ -27,8 +36,56 @@ use_cmake <- function(pkg = ".") {
   cat(output, file = file.path(pkg$path, "CMakeLists.txt"), sep = "\n")
 
   use_build_ignore("CMakeLists.txt", pkg = pkg)
-  message("'CMakeLists.txt' file successfully generated.")
+  message("> 'CMakeLists.txt' file successfully generated.")
+}
 
+run_cmake <- function(args = NULL, build_dir, pkg = ".") {
+  pkg <- as.package(pkg)
+
+  cmake <- Sys.which("cmake")
+  if (cmake == "") {
+    stop("'cmake' executable could not be found")
+  }
+
+  build_path <- file.path(
+    pkg$path,
+    build_dir
+  )
+
+#   if (dir.exists(build_path)) {
+#     stop("Path '", build_path, "' already exists!")
+#   }
+
+  dir.create(build_path, showWarnings = FALSE)
+  with_dir(build_path, {
+    if (!is.null(args)) {
+      cmd <- paste("cmake", "..", paste(args, collapse = " "))
+    } else {
+      cmd <- "cmake .."
+    }
+    message("> Running '", cmd, "' to generate project files...")
+    result <- suppressWarnings(
+      system2("cmake", c("..", args, "-Wno-dev"),
+              stdout = TRUE, stderr = TRUE)
+    )
+  })
+
+  use_build_ignore(build_dir, pkg = pkg)
+  use_git_ignore(build_dir, pkg = pkg)
+  message("> Done!")
+}
+
+#' @section \code{use_ide}:
+#' Allows an \R package containing C/C++ source files to be managed from within
+#' a generic cmake-compatible IDE, e.g. QtCreator.
+#' @export
+#' @name infrastructure
+#' @rdname infrastructure
+use_ide <- function(pkg = ".") {
+  pkg <- as.package(pkg)
+  use_cmake(pkg = pkg)
+  build_dir <- paste(pkg$package, "build", sep = "-")
+  run_cmake(build_dir = build_dir, pkg = pkg)
 }
 
 #' @section \code{use_xcode}:
@@ -40,37 +97,24 @@ use_cmake <- function(pkg = ".") {
 use_xcode <- function(pkg = ".") {
   pkg <- as.package(pkg)
   use_cmake(pkg = pkg)
-  cmake <- Sys.which("cmake")
-  if (cmake == "") {
-    stop("No 'cmake' executable could be found; cannot build XCode project scaffolding")
+
+  build_dir <- paste(pkg$package, "xcode", "build", sep = "-")
+  run_cmake(args = "-GXcode", build_dir = build_dir, pkg = pkg)
+
+  open <- paste("open", file.path(build_dir, paste0(pkg$package, ".xcodeproj")))
+
+  if (is.mac()) {
+    msg <- c(
+      "> XCode project files successfully generated.\n\n",
+      "Open the project in XCode with:\n\n    ",
+      open,
+      "\n\nor by manually opening the project from within XCode."
+    )
+
+    message(msg)
   }
 
-  rel_build_path <- paste(pkg$package, "xcode", "build", sep = "-")
-  build_path <- file.path(
-    pkg$path,
-    rel_build_path
-  )
-
-  if (dir.exists(build_path)) {
-    stop("Path '", build_path, "' already exists!")
-  }
-
-  dir.create(build_path, showWarnings = FALSE)
-  with_dir(build_path, {
-    system2("cmake", c("-GXcode", "..", "-Wno-dev"))
-  })
-
-  use_build_ignore(rel_build_path, pkg = pkg)
-
-  open <- paste("open", file.path(build_path, paste0(pkg$package, ".xcodeproj")))
-
-  msg <- c(
-    "XCode project files successfully generated. Open the project in XCode with:\n\n    ",
-    open,
-    "\n\nor by manually opening the project from within XCode."
-  )
-  message(msg)
-  open
+  invisible(open)
 
 }
 
@@ -119,6 +163,24 @@ make_library_directive <- function(name, link, vec) {
     link, "\n  ",
     paste(vec, collapse = "\n  "),
     "\n)\n"
+  )
+}
+
+make_exe_directive <- function(name, vec) {
+  paste0(
+    "add_executable(",
+    name, "\n  ",
+    paste(vec, collapse = "\n  "),
+    "\n)\n"
+  )
+}
+
+add_custom_target <- function(target, command, dir) {
+  paste0(
+    "add_custom_target(", target,
+    "\n  ", "COMMAND ", command,
+    "\n  ", "WORKING_DIRECTORY ", dir,
+    "\n)"
   )
 }
 
@@ -245,15 +307,20 @@ use_cmake_mac <- function(pkg) {
                         "inst/*")
   )
 
-  add_library_directive <- c(
+  source_files <- c(
     paste0("${", pkgname_upper, "_SOURCES}"),
-    paste0("${", pkgname_upper, "_HEADERS}"),
+    paste0("${", pkgname_upper, "_HEADERS}")
+  )
+
+  other_files <- c(
     paste0("${", pkgname_upper, "_R}"),
     paste0("${", pkgname_upper, "_MAN}"),
     paste0("${", pkgname_upper, "_TESTS}"),
     paste0("${", pkgname_upper, "_VIGNETTES}"),
     paste0("${", pkgname_upper, "_INST}")
   )
+
+  r_path <- file.path(R.home("bin"), "R")
 
   all <- c(
     make_directives(lead_directives, collapse = TRUE),
@@ -266,7 +333,22 @@ use_cmake_mac <- function(pkg) {
     "",
     make_set_directives(set_directives),
     make_set_directives(list(CMAKE_SKIP_BUILD_RPATH = "TRUE")),
-    make_library_directive(pkg$package, "SHARED", add_library_directive)
+    "## The main target that builds the shared object for the package's compiled code",
+    make_library_directive(pkg$package, "SHARED", source_files),
+    "",
+    "## A dummy target that builds using all files",
+    make_library_directive(
+      paste(pkg$package, "all", sep = "-"),
+      "SHARED EXCLUDE_FROM_ALL",
+      c(source_files, other_files)
+    ),
+    "",
+    "## A custom target that builds the package, if desired",
+    add_custom_target(
+      target = "pkg",
+      command = paste("R CMD build", pkg$path, "&&", "R CMD INSTALL", pkg$path),
+      dir = "${TMPDIR}"
+    )
   )
 
 }

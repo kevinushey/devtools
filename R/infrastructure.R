@@ -360,6 +360,14 @@ use_build_ignore <- function(files, escape = TRUE, pkg = ".") {
   invisible(TRUE)
 }
 
+use_git_ignore <- function(files, pkg = ".") {
+  pkg <- as.package(pkg)
+
+  path <- file.path(pkg$path, ".gitignore")
+  union_write(path, files)
+  invisible(TRUE)
+}
+
 add_build_ignore <- function(pkg = ".", files, escape = TRUE) {
   use_build_ignore(files, escape = escape, pkg = pkg)
 }
