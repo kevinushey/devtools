@@ -322,8 +322,10 @@ use_cmake_mac <- function(pkg) {
     "## Main directives -- thes may need to be updated manually if",
     "## you are making use of libraries not declared in the DESCRIPTION",
     cmake_include_directories(include_directories),
-    cmake_link_directories(link_directories),
-    cmake_link_libraries(link_libraries),
+    cmake_target_link_libraries(
+      target = pkg$package,
+      file.path(R.home("lib"), "libR.dylib")
+    ),
     cmake_add_compile_options(add_compile_options),
     cmake_set("CMAKE_EXE_LINKER_FLAGS", CMAKE_EXE_LINKER_FLAGS)
   )

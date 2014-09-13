@@ -70,5 +70,5 @@ cmake_minimum_required <- function(version, error = "FATAL_ERROR") {
 }
 
 cmake_target_link_libraries <- function(target, items) {
-  cmake_directive(target, others = items)
+  cmake_directive("target_link_libraries", target, others = items)
 }
