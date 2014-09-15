@@ -33,7 +33,7 @@ use_cmake <- function(pkg = ".") {
 
   generic_directives <- unlist(c(
     cmake_minimum_required("3.0"),
-    cmake_project("roxygen2"),
+    cmake_project(pkg$package),
 
     cmake_file_glob_recurse(
       paste0(NAME, "_SOURCES"),

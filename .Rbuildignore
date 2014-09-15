@@ -3,3 +3,5 @@
 ^\.travis\.yml$
 ^NEWS.md$
 ^cran-comments\.md$
+^CMakeLists\.txt$
+^devtools-xcode-build$
