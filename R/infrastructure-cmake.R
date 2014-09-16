@@ -157,7 +157,7 @@ run_cmake <- function(args = NULL, build_dir, pkg = ".") {
     )
   })
 
-  use_build_ignore(build_dir, pkg = pkg)
+  use_build_ignore(paste0(build_dir, "/"), pkg = pkg)
   use_git_ignore(build_dir, pkg = pkg)
   message("> Done!")
 }
