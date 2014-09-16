@@ -72,3 +72,10 @@ cmake_minimum_required <- function(version, error = "FATAL_ERROR") {
 cmake_target_link_libraries <- function(target, items) {
   cmake_directive("target_link_libraries", target, others = items)
 }
+
+cmake_find_package <- function(package, required = TRUE) {
+  first_line <- paste(
+    if (required) "REQUIRED"
+  )
+  cmake_directive("find_package", paste(package, first_line))
+}
