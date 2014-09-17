@@ -67,7 +67,10 @@ use_cmake <- function(pkg = ".") {
       )
     }),
     "",
-    cmake_add_definitions("-DNDEBUG"),
+    cmake_add_definitions(c(
+      "-DNDEBUG",
+      paste0("-DCOMPILING_", NAME)
+    )),
     "",
     cmake_add_library(pkg$package,
       sapply(c("sources", "headers"), function(x) as_cmake_env(x, pkg = pkg))
